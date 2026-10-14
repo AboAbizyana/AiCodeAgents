@@ -1,9 +1,14 @@
-from CoderAgent import coder_agent
+from RecoveryLoop import recovery_loop
 
-answer = coder_agent(
-    "Calculate the mean of [10, 20, 30, 40]"
-)
+code = """
+a = 10
+b = 20
+print(a + c)
+"""
 
-print("Explanation:", answer.explanation)
-print("Generated code:")
-print(answer.code)
+result = recovery_loop(code, max_retries=3)
+
+print("Status:", result["status"])
+print("Success:", result["success"])
+print("Retries:", result["retries_used"])
+print("History length:", len(result["history"]))

@@ -1,6 +1,6 @@
 from CoderAgent import coder_agent
 from Tools import execute_python_sandbox
-from ErrorRecovery import analyze_error
+from RecoveryLoop import recovery_loop
 
 task = input('Task: ')
 
@@ -18,19 +18,20 @@ if confirmation != "yes":
     print("Execution cancelled.")
     raise SystemExit
 
-result = execute_python_sandbox(answer.code, 5)
+result = recovery_loop(answer.code, max_retries=3)
 
-if result['cleanup_success'] is False:
-    print("Clean up failed.")
+print("Status:", result["status"])
+print("Success:", result["success"])
+print("Final code:", result["final_code"])
+
+confirmation = input("\nExecute this code? (yes/no): ")
+
+if confirmation != "yes":
+    print("Execution cancelled.")
     raise SystemExit
-elif result['success'] is True:
-    print("Success!!")
-    print(f'Result (stdout): {result['stdout']}')
-elif result['error_source'] == 'python':
-    print('Python code Error')
-    res = analyze_error(answer.code, result)
-    print(f'Explanation:\n{res.explanation}')
-    print(f'Corrected code:\n{res.corrected_code}')
-elif result['error_source'] == 'infrastructure' or result['error_source'] == 'timeout':
-    print(f'Error Source:\n{result["error_source"]}')
-    print(f'Error (stderr):\n{result["stderr"]}')
+
+ans = execute_python_sandbox(result["final_code"], 20)
+
+print("Success:", ans["success"])
+print('Result (stdout): ', ans["stdout"])
+print('Result (stderr): ', ans["stderr"])
