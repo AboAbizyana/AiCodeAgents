@@ -4,6 +4,7 @@ import subprocess
 from tempfile import NamedTemporaryFile
 import sys
 import uuid
+from StructuredData import MetricsSchema
 
 def multiply(a: int, b: int) -> int:
     return a * b
@@ -152,5 +153,21 @@ def execute_python_sandbox(code: str, timeout: int) -> dict:
         return result
 
 
+def parse_metrics(stdout: str) -> MetricsSchema | None:
+    if not isinstance(stdout, str):
+        raise TypeError("stdout must be a string")
 
+    metrics = None
+    lines = stdout.splitlines()
+
+    for line in lines:
+        line = line.lstrip()
+        if line.startswith("METRICS "):
+            json_text = line[len("METRICS "):]
+            data = json.loads(json_text)
+            metrics = MetricsSchema.model_validate(data)
+            break
+
+
+    return metrics
 
